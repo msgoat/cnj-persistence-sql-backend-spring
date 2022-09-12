@@ -136,6 +136,11 @@
             <artifactId>cnj-common-security-oidc-spring</artifactId>
             <version>${common.security.version}</version>
         </dependency>
+        <dependency>
+            <groupId>group.msg.at.cloud.common</groupId>
+            <artifactId>cnj-common-observability-spring</artifactId>
+            <version>0.5.0</version>
+        </dependency>
         <!-- showcase specific section -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
