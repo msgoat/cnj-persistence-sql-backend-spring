@@ -26,9 +26,9 @@ services:
   downstream:
     image: docker.cloudtrain.aws.msgoat.eu/cloudtrain/cnj-persistence-sql-downstream:latest
     environment:
-      DOCKER_JAVA_OPTS: "-XX:+UseContainerSupport -Xms1g -Xmx1g"
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: https://oidc.cloudtrain.aws.msgoat.eu/auth/realms/cloudtrain/protocol/openid-connect/certs
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: https://oidc.cloudtrain.aws.msgoat.eu/auth/realms/cloudtrain
+      DOCKER_JAVA_OPTS: "-Xms1g -Xmx1g"
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: https://oidc.cloudtrain.aws.msgoat.eu/realms/cloudtrain/protocol/openid-connect/certs
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: https://oidc.cloudtrain.aws.msgoat.eu/realms/cloudtrain
 
   backend:
     image: ${docker.image.name}:${project.version}
@@ -36,10 +36,10 @@ services:
       - "38080:8080"
       - "38089:8089"
     environment:
-      DOCKER_JAVA_OPTS: "-XX:+UseContainerSupport -Xms1g -Xmx1g"
+      DOCKER_JAVA_OPTS: "-Xms1g -Xmx1g"
       AGENT_JAVA_OPTS: "-javaagent:/home/spring/org.jacoco.agent.jar=output=tcpserver,address=*,port=8089"
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: https://oidc.cloudtrain.aws.msgoat.eu/auth/realms/cloudtrain/protocol/openid-connect/certs
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: https://oidc.cloudtrain.aws.msgoat.eu/auth/realms/cloudtrain
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: https://oidc.cloudtrain.aws.msgoat.eu/realms/cloudtrain/protocol/openid-connect/certs
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: https://oidc.cloudtrain.aws.msgoat.eu/realms/cloudtrain
       CLOUDTRAIN_SERVICES_DOWNSTREAM_URL: http://downstream:8080
       POSTGRES_DB_HOST: postgres
       POSTGRES_DB_PORT: 5432

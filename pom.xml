@@ -10,26 +10,29 @@
     <properties>
         <!-- new Maven version management -->
         <revision>5.0.0</revision>
-        <sha1></sha1>
-        <changelist></changelist>
+        <sha1>.12345678</sha1>
+        <changelist>.LOCAL</changelist>
         <!-- common properties -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <!-- runtime related properties -->
-        <java.version>11</java.version>
-        <spring.boot.version>2.7.1</spring.boot.version>
+        <java.version>17</java.version>
+        <spring.boot.version>3.1.0</spring.boot.version>
         <start-class>group.msg.at.cloud.cloudtrain.SpringPersistenceApplication</start-class>
         <!-- common logging dependencies -->
-        <logstash.logback.encoder.version>7.2</logstash.logback.encoder.version>
+        <logstash.logback.encoder.version>7.3</logstash.logback.encoder.version>
         <!-- common test dependencies -->
-        <junit.version>5.8.1</junit.version>
-        <restassured.version>4.4.0</restassured.version>
-        <cnj.common.test.version>3.0.1</cnj.common.test.version>
+        <junit.version>5.9.2</junit.version>
+        <restassured.version>5.2.1</restassured.version>
+        <cnj.common.test.core.version>1.1.0</cnj.common.test.core.version>
+        <cnj.common.test.jakarta.version>1.0.0</cnj.common.test.jakarta.version>
         <!-- common persistence dependencies -->
-        <flyway.version>6.4.2</flyway.version>
-        <postgres.jdbc.version>42.3.1</postgres.jdbc.version>
+        <flyway.version>9.18.0</flyway.version>
+        <postgres.jdbc.version>42.6.0</postgres.jdbc.version>
         <!-- common security dependencies -->
-        <common.security.version>1.2.0</common.security.version>
+        <cnj.common.security.version>2.0.0</cnj.common.security.version>
+        <!-- common rest dependencies -->
+        <cnj.common.observability.version>1.0.0</cnj.common.observability.version>
         <!-- docker related properties -->
         <docker.registry.name>docker.cloudtrain.aws.msgoat.eu</docker.registry.name>
         <docker.organization.name>cloudtrain</docker.organization.name>
@@ -39,8 +42,8 @@
         <docker.verbose>true</docker.verbose>
         <docker.test.target.route>http://localhost:38080</docker.test.target.route>
         <!-- kubernetes related properties -->
-        <k8s.cluster.route>https://apps.cloudtrain.aws.msgoat.eu</k8s.cluster.route>
-        <k8s.cluster.namespace>default</k8s.cluster.namespace>
+        <k8s.cluster.route>https://${k8s.ingress.host}</k8s.cluster.route>
+        <k8s.cluster.namespace>cloudtrain</k8s.cluster.namespace>
         <k8s.ingress.host>apps.cloudtrain.aws.msgoat.eu</k8s.ingress.host>
         <k8s.ingress.path>/${k8s.cluster.namespace}/${project.artifactId}</k8s.ingress.path>
         <k8s.test.target.route>${k8s.cluster.route}${k8s.ingress.path}</k8s.test.target.route>
@@ -61,7 +64,7 @@
         <!-- pinning versions of application type specific maven plugins -->
         <maven.spring.boot.plugin.version>${spring.boot.version}</maven.spring.boot.plugin.version>
         <!-- pinning versions of cloud native specific maven plugins -->
-        <maven.compose.plugin.version>3.0.0</maven.compose.plugin.version>
+        <maven.compose.plugin.version>4.0.0</maven.compose.plugin.version>
         <maven.docker.plugin.version>0.37.0</maven.docker.plugin.version>
         <maven.helm.plugin.version>4.0.0</maven.helm.plugin.version>
         <!-- quality assurance properties -->
@@ -104,16 +107,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-starter-tomcat</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-undertow</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -134,12 +127,12 @@
         <dependency>
             <groupId>group.msg.at.cloud.common</groupId>
             <artifactId>cnj-common-security-oidc-spring</artifactId>
-            <version>${common.security.version}</version>
+            <version>${cnj.common.security.version}</version>
         </dependency>
         <dependency>
             <groupId>group.msg.at.cloud.common</groupId>
             <artifactId>cnj-common-observability-spring</artifactId>
-            <version>0.5.0</version>
+            <version>${cnj.common.observability.version}</version>
         </dependency>
         <!-- showcase specific section -->
         <dependency>
@@ -165,13 +158,13 @@
         <dependency>
             <groupId>group.msg.at.cloud.common</groupId>
             <artifactId>cnj-common-test-core</artifactId>
-            <version>0.9.0</version>
+            <version>${cnj.common.test.core.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>group.msg.at.cloud.common</groupId>
             <artifactId>cnj-common-test-jakarta</artifactId>
-            <version>0.1.0</version>
+            <version>${cnj.common.test.jakarta.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -192,6 +185,12 @@
                         <source>${java.version}</source>
                         <target>${java.version}</target>
                         <parameters>true</parameters>
+                        <showDeprecation>true</showDeprecation>
+                        <showWarnings>true</showWarnings>
+                        <compilerArgs>
+                            <arg>-Xlint</arg>
+                            <!-- <arg>-Xdoclint</arg> -->
+                        </compilerArgs>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -844,7 +843,6 @@
         <profile>
             <id>integration-test-stage</id>
             <properties>
-                <k8s.cluster.namespace>cloudtrain-int</k8s.cluster.namespace>
                 <spring-boot.repackage.skip>true</spring-boot.repackage.skip>
             </properties>
             <build>
