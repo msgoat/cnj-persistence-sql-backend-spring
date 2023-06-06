@@ -1,5 +1,5 @@
 {{- if .Values.ingress.enabled }}
-{{- $fullName := include "cnj-persistence-sql-backend-micro.fullname" . }}
+{{- $fullName := include "cnj-persistence-sql-backend-spring.fullname" . }}
 {{- if eq .Values.ingress.type "nginx" }}
 ---
 apiVersion: networking.k8s.io/v1
@@ -7,7 +7,7 @@ kind: Ingress
 metadata:
   name: {{ $fullName }}
   labels:
-    {{- include "cnj-persistence-sql-backend-micro.labels" . | nindent 4 }}
+    {{- include "cnj-persistence-sql-backend-spring.labels" . | nindent 4 }}
   annotations:
   {{- if eq .Values.ingress.pathType "Prefix" }}
     nginx.ingress.kubernetes.io/rewrite-target: /$2
@@ -42,9 +42,9 @@ spec:
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
-  name: {{ include "cnj-persistence-sql-backend-micro.fullname" . }}
+  name: {{ include "cnj-persistence-sql-backend-spring.fullname" . }}
   labels:
-    {{- include "cnj-persistence-sql-backend-micro.labels" . | nindent 4 }}
+    {{- include "cnj-persistence-sql-backend-spring.labels" . | nindent 4 }}
 spec:
   entryPoints:
     - web
@@ -52,18 +52,18 @@ spec:
     - kind: Rule
       match: Host(`{{ .Values.ingress.host }}`) && PathPrefix(`{{ .Values.ingress.path }}`)
       middlewares:
-        - name: {{ include "cnj-persistence-sql-backend-micro.fullname" . }}-stripprefix
+        - name: {{ include "cnj-persistence-sql-backend-spring.fullname" . }}-stripprefix
       services:
         - kind: Service
-          name: {{ include "cnj-persistence-sql-backend-micro.fullname" . }}
+          name: {{ include "cnj-persistence-sql-backend-spring.fullname" . }}
           port: {{ .Values.service.port }}
 ---
 apiVersion: traefik.containo.us/v1alpha1
 kind: Middleware
 metadata:
-  name: {{ include "cnj-persistence-sql-backend-micro.fullname" . }}-stripprefix
+  name: {{ include "cnj-persistence-sql-backend-spring.fullname" . }}-stripprefix
   labels:
-  {{- include "cnj-persistence-sql-backend-micro.labels" . | nindent 4 }}
+  {{- include "cnj-persistence-sql-backend-spring.labels" . | nindent 4 }}
 spec:
   stripPrefix:
     prefixes:
