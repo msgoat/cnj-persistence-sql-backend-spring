@@ -19,7 +19,7 @@ container:
     image:
       repository: ${docker.image.name}
       tag: ${project.version}
-      pullPolicy: Always # IfNotPresent
+      pullPolicy: IfNotPresent
     ports:
       http:
         number: 8080
