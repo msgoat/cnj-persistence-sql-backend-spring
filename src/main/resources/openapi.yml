@@ -1,0 +1,276 @@
+openapi: 3.0.1
+info:
+  title: ${project.artifactId}
+  description: ${project.description}
+  contact:
+    url: https://github.com/msgoat/${project.artifactId}
+  version: ${revision}
+servers:
+  - url: ${k8s.test.target.route}
+paths:
+  /api/v1/tasks/{taskId}:
+    get:
+      tags:
+        - tasks-controller
+      summary: returns the task with the given task ID
+      operationId: getTaskById
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: body contains the task with the given task ID
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schema/Task'
+        "400":
+          description: unable to find a task with the given task ID; body is empty
+      security:
+        - oidc:
+            - openid
+            - microprofile-jwt
+    put:
+      tags:
+        - tasks-controller
+      summary: updates the given task
+      operationId: updateTask
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Task'
+        required: true
+      responses:
+        "400":
+          description: failed to update task due to invalid task data
+        "500":
+          description: failed to create new task due to internal error
+        "204":
+          description: task could be updated successfully; body is empty
+      security:
+        - oidc:
+            - openid
+            - microprofile-jwt
+    delete:
+      tags:
+        - tasks-controller
+      summary: deletes the given task
+      operationId: deleteTask
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: task could be deleted successfully; body is empty
+        "500":
+          description: failed to delete task due to internal error
+      security:
+        - oidc:
+            - openid
+            - microprofile-jwt
+  /api/v1/tasks:
+    get:
+      tags:
+        - tasks-controller
+      summary: returns all tasks
+      operationId: getAllTasks
+      responses:
+        "200":
+          description: body contains all available tasks
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Task'
+      security:
+        - oidc:
+            - openid
+            - microprofile-jwt
+    post:
+      tags:
+        - tasks-controller
+      summary: creates a new task based on the given task data and returns its location
+        URI
+      operationId: addTask
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Task'
+        required: true
+      responses:
+        "400":
+          description: failed to create new task due to invalid task data
+        "500":
+          description: failed to create new task due to internal error
+        "201":
+          description: task could be created successfully; header location contains
+            URI of newly created task; body is empty
+          headers:
+            Location:
+              description: URI of newly created task
+              style: simple
+      security:
+        - oidc:
+            - openid
+            - microprofile-jwt
+components:
+  schemas:
+    Task:
+      required:
+        - category
+        - lifeCycleState
+        - priority
+        - subject
+      type: object
+      properties:
+        id:
+          type: string
+          description: unique identifier of this task
+          format: uuid
+        subject:
+          maxLength: 80
+          minLength: 1
+          type: string
+          description: single-line description or summary of what this task is about
+        description:
+          maxLength: 1024
+          minLength: 0
+          type: string
+          description: detailed description of this task
+        category:
+          $ref: '#/components/schemas/TaskCategory'
+        priority:
+          $ref: '#/components/schemas/TaskPriority'
+        lifeCycleState:
+          $ref: '#/components/schemas/TaskLifeCycleState'
+        submittedAt:
+          type: string
+          description: date/time when this task has been submitted
+          format: date-time
+        submitterUserId:
+          type: string
+          description: user-ID of participant who submitted this task
+        dueDate:
+          type: string
+          description: date/time when this task is supposed to be completed
+          format: date-time
+        completionRate:
+          maximum: 100
+          minimum: 0
+          type: integer
+          description: "completion rate in percent, ranges from 0 to 100"
+          format: int32
+        completionDate:
+          type: string
+          description: date/time when this task has been completed
+          format: date-time
+        completedByUserId:
+          maxLength: 16
+          minLength: 0
+          type: string
+          description: user-ID of participant who completed this task
+        responsibleUserId:
+          maxLength: 16
+          minLength: 0
+          type: string
+          description: user-ID of participant who is currently responsible for the
+            completion of this task
+        affectedProjectId:
+          maxLength: 32
+          minLength: 0
+          type: string
+          description: project-ID of the project this task is related to
+        affectedApplicationId:
+          maxLength: 32
+          minLength: 0
+          type: string
+          description: application-ID of the application this task is related to
+        affectedModule:
+          maxLength: 32
+          minLength: 0
+          type: string
+          description: name of the logical module this task is related to
+        affectedResource:
+          maxLength: 256
+          minLength: 0
+          type: string
+          description: application resource that this task is referring to
+        estimatedEffort:
+          type: integer
+          description: estimated effort in hours to complete this task
+          format: int32
+        actualEffort:
+          type: integer
+          description: actual effort in hours to complete this task
+          format: int32
+        createdBy:
+          maxLength: 31
+          minLength: 0
+          type: string
+          description: user-ID of the user who created this task
+        createdAt:
+          type: string
+          description: date/time when this task has been created
+          format: date-time
+        lastModifiedBy:
+          maxLength: 31
+          minLength: 0
+          type: string
+          description: user-ID of the last user who modified this task
+        lastModifiedAt:
+          type: string
+          description: date/time when this task has been modified
+          format: date-time
+      description: represents a task
+    TaskCategory:
+      type: string
+      description: represents the various categories of a Task
+      enum:
+        - UNDEFINED
+        - BUGFIX
+        - REFACTORING
+        - NEW_FEATURE
+        - PERFORMANCE_IMPROVEMENT
+        - RELEASE_MANAGEMENT
+        - QUALITY_ASSURANCE
+        - BUILD_FAILURE
+        - COMMUNICATION
+    TaskLifeCycleState:
+      type: string
+      description: represents the life-cyle state of a Task
+      enum:
+        - UNDEFINED
+        - OPEN_UNDER_WORK
+        - OPEN_RUNNING
+        - CLOSED_COMPLETED
+        - CLOSED_REVOKED
+        - CLOSED_CANCELLED
+    TaskPriority:
+      type: string
+      description: represents the priority of a Task
+      enum:
+        - UNDEFINED
+        - LOW
+        - MEDIUM
+        - HIGH
+        - CRITICAL
+  securitySchemes:
+    oidc:
+      type: openIdConnect
+      openIdConnectUrl: https://oidc.cloudtrain.aws.msgoat.eu/realms/cloudtrain/.well-known/openid-configuration

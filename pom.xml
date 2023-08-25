@@ -9,10 +9,10 @@
     <description>Cloud native Java backend using Spring Data for persistence based on Spring Boot</description>
     <properties>
         <!-- new Maven version management -->
-        <revision>5.0.0</revision>
+        <revision>5.1.0</revision>
         <sha1>.12345678</sha1>
         <changelist>.LOCAL</changelist>
-        <!-- common properties -->
+        <!-- general properties -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <!-- runtime related properties -->
@@ -21,6 +21,10 @@
         <start-class>group.msg.at.cloud.cloudtrain.SpringPersistenceApplication</start-class>
         <!-- common logging dependencies -->
         <logstash.logback.encoder.version>7.3</logstash.logback.encoder.version>
+        <!-- common security dependencies -->
+        <cnj.common.security.version>2.2.0</cnj.common.security.version>
+        <!-- common rest dependencies -->
+        <cnj.common.observability.version>1.1.0</cnj.common.observability.version>
         <!-- common test dependencies -->
         <junit.version>5.9.2</junit.version>
         <restassured.version>5.2.1</restassured.version>
@@ -29,10 +33,6 @@
         <!-- common persistence dependencies -->
         <flyway.version>9.18.0</flyway.version>
         <postgres.jdbc.version>42.6.0</postgres.jdbc.version>
-        <!-- common security dependencies -->
-        <cnj.common.security.version>2.0.0</cnj.common.security.version>
-        <!-- common rest dependencies -->
-        <cnj.common.observability.version>1.0.0</cnj.common.observability.version>
         <!-- docker related properties -->
         <docker.registry.name>docker.cloudtrain.aws.msgoat.eu</docker.registry.name>
         <docker.organization.name>cloudtrain</docker.organization.name>
@@ -64,7 +64,7 @@
         <!-- pinning versions of application type specific maven plugins -->
         <maven.spring.boot.plugin.version>${spring.boot.version}</maven.spring.boot.plugin.version>
         <!-- pinning versions of cloud native specific maven plugins -->
-        <maven.compose.plugin.version>4.0.0</maven.compose.plugin.version>
+        <maven.compose.plugin.version>5.0.0</maven.compose.plugin.version>
         <maven.docker.plugin.version>0.37.0</maven.docker.plugin.version>
         <maven.helm.plugin.version>4.0.0</maven.helm.plugin.version>
         <!-- quality assurance properties -->
@@ -134,6 +134,10 @@
             <artifactId>cnj-common-observability-spring</artifactId>
             <version>${cnj.common.observability.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
+        </dependency>
         <!-- showcase specific section -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -189,7 +193,6 @@
                         <showWarnings>true</showWarnings>
                         <compilerArgs>
                             <arg>-Xlint</arg>
-                            <!-- <arg>-Xdoclint</arg> -->
                         </compilerArgs>
                     </configuration>
                 </plugin>
@@ -902,23 +905,9 @@
                                     <releaseName>${project.artifactId}</releaseName>
                                     <namespace>${k8s.cluster.namespace}</namespace>
                                     <debug>true</debug>
-                                    <timeout>120s</timeout>
+                                    <timeout>90s</timeout>
                                 </configuration>
                             </execution>
-                            <!--
-                                                        <execution>
-                                                            <id>helm-delete</id>
-                                                            <phase>post-integration-test</phase>
-                                                            <goals>
-                                                                <goal>uninstall</goal>
-                                                            </goals>
-                                                            <configuration>
-                                                                <releaseName>${project.artifactId}</releaseName>
-                                                                <namespace>${k8s.cluster.namespace}</namespace>
-                                                                <debug>true</debug>
-                                                            </configuration>
-                                                        </execution>
-                            -->
                         </executions>
                     </plugin>
                     <!-- run system tests on installed helm release -->
@@ -965,4 +954,30 @@
             <url>https://nexus.cloudtrain.aws.msgoat.eu/repository/cloudtrain-releases/</url>
         </repository>
     </distributionManagement>
+    <pluginRepositories>
+        <pluginRepository>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>daily</updatePolicy>
+                <checksumPolicy>fail</checksumPolicy>
+            </releases>
+            <id>cloudtrain-maven-repository</id>
+            <name>msg Automotive CloudTrain Releases Repository</name>
+            <url>https://nexus.cloudtrain.aws.msgoat.eu/repository/cloudtrain-releases/</url>
+            <layout>default</layout>
+        </pluginRepository>
+    </pluginRepositories>
+    <repositories>
+        <repository>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>daily</updatePolicy>
+                <checksumPolicy>fail</checksumPolicy>
+            </releases>
+            <id>cloudtrain-maven-repository</id>
+            <name>msg Automotive CloudTrain Releases Repository</name>
+            <url>https://nexus.cloudtrain.aws.msgoat.eu/repository/cloudtrain-releases/</url>
+            <layout>default</layout>
+        </repository>
+    </repositories>
 </project>
